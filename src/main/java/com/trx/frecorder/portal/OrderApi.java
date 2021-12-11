@@ -1,5 +1,6 @@
 package com.trx.frecorder.portal;
 
+import com.trx.frecorder.jfr.aop.annotation.JfrHttProfile;
 import com.trx.frecorder.model.Order;
 import com.trx.frecorder.repository.InMemoryOrderRepository;
 import org.springframework.http.MediaType;
@@ -19,7 +20,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/order", produces = MediaType.APPLICATION_JSON_VALUE)
-
 public class OrderApi {
 
     private final InMemoryOrderRepository inMemoryOrderRepository;
@@ -28,6 +28,7 @@ public class OrderApi {
         this.inMemoryOrderRepository = inMemoryOrderRepository;
     }
 
+    @JfrHttProfile
     @GetMapping
     public List<Order> all() {
         return inMemoryOrderRepository.findAll();
@@ -50,6 +51,7 @@ public class OrderApi {
                         () -> inMemoryOrderRepository.save(order));
     }
 
+    @JfrHttProfile
     @PutMapping
     public void create(@RequestBody Order order) {
         inMemoryOrderRepository.save(order);

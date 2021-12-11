@@ -24,6 +24,9 @@ public class HttpSampleEvent extends Event {
     @Label("Resource Method")
     public String method;
 
+    @Label("Java Method")
+    public String javaMethod;
+
     @Label("Media Type")
     public String mediaType;
 
