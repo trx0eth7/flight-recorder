@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Name(HttpSampleEvent.NAME)
 @StackTrace(false)
 public class HttpSampleEvent extends Event {
-    static final String NAME = "com.trx.frecorder.jfr.HttpSample";
+    static final String NAME = "com.trx.frecorder.jfr.event.HttpSample";
 
     @Label("Resource Method")
     public String method;
