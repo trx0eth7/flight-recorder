@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration version="2.0" label="Custom" description="Low overhead configuration safe for continuous use in production environments, typically less than 1 % overhead." provider="Oracle">
+  <event name="com.trx.frecorder.jfr.HttpSample">
+    <setting name="enabled">true</setting>
+    <setting name="stackTrace">false</setting>
+  </event>
+</configuration>
