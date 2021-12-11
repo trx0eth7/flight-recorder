@@ -1,8 +1,11 @@
 package com.trx.frecorder.portal;
 
+import com.trx.frecorder.jfr.JfrHttpSampleTemplate;
 import com.trx.frecorder.model.Order;
 import com.trx.frecorder.repository.InMemoryOrderRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,36 +26,53 @@ import java.util.List;
 public class OrderApi {
 
     private final InMemoryOrderRepository inMemoryOrderRepository;
+    private final JfrHttpSampleTemplate jfrHttpSampleTemplate;
 
-    public OrderApi(InMemoryOrderRepository inMemoryOrderRepository) {
+
+    public OrderApi(InMemoryOrderRepository inMemoryOrderRepository,
+                    JfrHttpSampleTemplate jfrHttpSampleTemplate) {
         this.inMemoryOrderRepository = inMemoryOrderRepository;
+        this.jfrHttpSampleTemplate = jfrHttpSampleTemplate;
     }
 
     @GetMapping
-    public List<Order> all() {
-        return inMemoryOrderRepository.findAll();
+    public ResponseEntity<List<Order>> all() {
+        return jfrHttpSampleTemplate
+                .profile((req, res) -> ResponseEntity.ok(inMemoryOrderRepository.findAll()));
     }
 
     @GetMapping("/{id}")
-    public Order one(@PathVariable Long id) {
-        return inMemoryOrderRepository.findById(id).orElse(null);
+    public ResponseEntity<Order> one(@PathVariable Long id) {
+        return jfrHttpSampleTemplate
+                .profile((req, res) -> ResponseEntity.ok(
+                        inMemoryOrderRepository.findById(id).orElse(null)));
     }
 
     @DeleteMapping("/{id}")
-    public void remove(@PathVariable Long id) {
-        inMemoryOrderRepository.deleteById(id);
+    public ResponseEntity<Void> remove(@PathVariable Long id) {
+        return jfrHttpSampleTemplate
+                .profile((req, res) -> {
+                    inMemoryOrderRepository.deleteById(id);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                });
     }
 
     @PostMapping("/{id}")
-    public void update(@PathVariable Long id, @RequestBody Order order) {
-        inMemoryOrderRepository.findById(id)
-                .ifPresentOrElse(origin -> _update(origin, order),
-                        () -> inMemoryOrderRepository.save(order));
+    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody Order order) {
+        return jfrHttpSampleTemplate.profile((req, res) -> {
+            inMemoryOrderRepository.findById(id)
+                    .ifPresentOrElse(origin -> _update(origin, order),
+                            () -> inMemoryOrderRepository.save(order));
+            return new ResponseEntity<>(HttpStatus.OK);
+        });
     }
 
     @PutMapping
-    public void create(@RequestBody Order order) {
-        inMemoryOrderRepository.save(order);
+    public ResponseEntity<Void> create(@RequestBody Order order) {
+        return jfrHttpSampleTemplate.profile((req, res) -> {
+            inMemoryOrderRepository.save(order);
+            return new ResponseEntity<>(HttpStatus.OK);
+        });
     }
 
     private void _update(Order order, Order anotherOrder) {
